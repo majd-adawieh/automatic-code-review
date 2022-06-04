@@ -1,0 +1,8 @@
+[
+  {
+    "code": "x = y + 20",
+    "comment": "'SystemExit' should be re-raised",
+    "critical": [2, 4],
+    "label": "code-smell"
+  }
+]
