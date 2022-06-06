@@ -4,17 +4,5 @@
     "comment": "'SystemExit' should be re-raised",
     "critical_positions": [20],
     "labels": ["code-smell"]
-  },
-  {
-    "code": "x = 30 + 20",
-    "comment": "'SystemExit' should be re-raised",
-    "critical_positions": [30, 20],
-    "labels": ["codes", "code-smell"]
-  },
-  {
-    "code": "x = 32 % 2",
-    "comment": "'SystemExit' should be re-raised",
-    "critical_positions": [30, 20],
-    "labels": ["codes", "code-smell"]
   }
 ]

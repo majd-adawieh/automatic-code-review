@@ -7,6 +7,7 @@ import numpy as np
 class ADRQN(nn.Module):
     def __init__(self, n_actions, state_size, embedding_size):
         super(ADRQN, self).__init__()
+        print("INIT THE NETWORK")
         self.n_actions = n_actions
         self.embedding_size = embedding_size
         self.embedder = nn.Linear(n_actions, embedding_size)
@@ -20,7 +21,6 @@ class ADRQN(nn.Module):
         # Takes observations with shape (batch_size, seq_len, state_size)
         # Takes one_hot actions with shape (batch_size, seq_len, n_actions)
         action_embedded = self.embedder(action)
-        print(action_embedded)
         observation = F.relu(self.obs_layer(observation))
         observation = F.relu(self.obs_layer2(observation))
         lstm_input = torch.cat([observation, action_embedded], dim=-1)
