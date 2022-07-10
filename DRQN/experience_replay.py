@@ -11,9 +11,11 @@ class ExpBuffer():
         self.storage = [[] for i in range(max_seqs)]
 
     def write_tuple(self, aoaro):
-        if len(self.storage[self.counter]) >= self.seq_len:
+        if len(self.storage[self.counter % self.max_seqs]) >= self.seq_len:
             self.counter += 1
-        self.storage[self.counter].append(aoaro)
+            self.storage[self.counter % self.max_seqs] = []
+
+        self.storage[self.counter % self.max_seqs].append(aoaro)
 
     def sample(self, batch_size):
         # Sample batches of (action, observation, action, reward, observation, done) tuples
@@ -26,9 +28,15 @@ class ExpBuffer():
         dones = []
 
         for i in range(batch_size):
-            seq_idx = np.random.randint(self.counter)
-            last_act, last_obs, act, rew, obs, done = zip(
-                *self.storage[seq_idx])
+            try:
+                seq_idx = np.random.randint(self.counter % self.max_seqs)
+                last_act, last_obs, act, rew, obs, done = zip(
+                    *self.storage[seq_idx])
+            except:
+                seq_idx = np.random.randint(self.counter % self.max_seqs)
+                last_act, last_obs, act, rew, obs, done = zip(
+                    *self.storage[seq_idx])
+
             last_actions.append(list(last_act))
             last_observations.append(last_obs)
             actions.append(list(act))

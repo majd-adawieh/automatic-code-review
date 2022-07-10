@@ -1,8 +1,0 @@
-[
-  {
-    "code": "print('hallo world')",
-    "comment": "'SystemExit' should be re-raised",
-    "critical_positions": [20],
-    "labels": ["code-smell"]
-  }
-]

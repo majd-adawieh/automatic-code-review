@@ -1,0 +1,573 @@
+[
+  {
+    "code": "class A:\r\n    def __mul__(self, other, unexpected):  # Noncompliant. Too many parameters\r\n        return 42\r\n\r\n    def __add__(self):  # Noncompliant. Missing one parameter\r\n        return 42\r\n\r\nA() * 3  # TypeError: __mul__() missing 1 required positional argument: 'unexpected'\r\nA() + 3  # TypeError: __add__() takes 1 positional argument but 2 were given",
+    "comment": "Special methods should have an expected number of parameters",
+    "label": "NOK"
+  },
+  {
+    "code": "class A:\r\n    def __mul__(self, other):\r\n        return 42\r\n\r\n    def __add__(self, other):\r\n        return 42\r\n\r\nA() * 3\r\nA() + 3",
+    "comment": "Special methods should have an expected number of parameters",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method():  # Noncompliant. \"self\" parameter is missing.\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method():  # Noncompliant. \"cls\" parameter is missing.\r\n        print(\"class_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method(self):\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method(cls):\r\n        print(\"class_method\")\r\n\r\n\r\n    @staticmethod\r\n    def static_method():\r\n        print(\"static_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "OK"
+  },
+  {
+    "code": "try:\r\n    raise TypeError()\r\nexcept ValueError or TypeError:  # Noncompliant\r\n    print(\"Catching only ValueError\")\r\nexcept ValueError and TypeError:  # Noncompliant\r\n    print(\"catching only TypeError\")\r\nexcept (ValueError or TypeError) as exception:  # Noncompliant\r\n    print(\"Catching only ValueError\")\r\n\r\nfoo = ValueError or TypeError  # foo == ValueError\r\nfoo = ValueError and TypeError  # foo == TypeError",
+    "comment": "Boolean expressions of exceptions should not be used in \"except\" statements",
+    "label": "NOK"
+  },
+  {
+    "code": "try:\r\n    raise TypeError()\r\nexcept (ValueError, TypeError) as exception:\r\n    print(\"Catching all exceptions\")",
+    "comment": "Boolean expressions of exceptions should not be used in \"except\" statements",
+    "label": "OK"
+  },
+  {
+    "code": "del (1, 2)[0]  # Noncompliant, tuples are immutable\r\n(1, 2)[0] = 42  # Noncompliant\r\n(1, 2)[0]\r\n\r\nclass A:\r\n    def __init__(self, values):\r\n        self._values = values\r\n\r\na = A([0,1,2])\r\n\r\na[0]  # Noncompliant\r\ndel a[0]  # Noncompliant\r\na[0] = 42  # Noncompliant\r\n\r\nclass B:\r\n    pass\r\n\r\nB[0]  # Noncompliant",
+    "comment": "Item operations should be done on objects supporting them",
+    "label": "NOK"
+  },
+  {
+    "code": "del [1, 2][0]  # Lists are mutable\r\n[1, 2][0] = 42\r\n[1, 2][0]\r\n\r\nclass A:\r\n    def __init__(self, values):\r\n        self._values = values\r\n\r\n    def __getitem__(self, key):\r\n        return self._values[key]\r\n\r\n    def __setitem__(self, key, value):\r\n        self._values[key] = value\r\n\r\n    def __delitem__(self, key):\r\n        del self._values[key]\r\n\r\na = A([0,1,2])\r\n\r\na[0]\r\ndel a[0]\r\na[0] = 42\r\n\r\nclass B:\r\n    def __class_getitem__(cls, key):\r\n        return [0, 1, 2, 3][key]\r\n\r\nB[0]",
+    "comment": "Item operations should be done on objects supporting them",
+    "label": "OK"
+  },
+  {
+    "code": "raise \"Something went wrong\"  # Noncompliant\r\n\r\nclass A:\r\n    pass\r\n\r\nraise A  # Noncompliant",
+    "comment": "Raised Exceptions must derive from BaseException",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyError(Exception):\r\n    pass\r\n\r\nraise MyError(\"Something went wrong\")\r\nraise MyError",
+    "comment": "Raised Exceptions must derive from BaseException",
+    "label": "OK"
+  },
+  {
+    "code": "class MyException(BaseException):  # Noncompliant\r\n    pass\r\n\r\nclass MyException(GeneratorExit):  # Noncompliant\r\n    pass\r\n\r\nclass MyException(KeyboardInterrupt):  # Noncompliant\r\n    pass\r\n\r\nclass MyException(SystemExit):  # Noncompliant\r\n    pass",
+    "comment": "Custom Exception classes should inherit from \"Exception\" or one of its subclasses",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyException(Exception):\r\n    pass",
+    "comment": "Custom Exception classes should inherit from \"Exception\" or one of its subclasses",
+    "label": "OK"
+  },
+  {
+    "code": "target = -5\r\nnum = 3\r\n\r\ntarget =- num  # Noncompliant; target = -3. Is that really what's meant?\r\ntarget =+ num # Noncompliant; target = 3",
+    "comment": "\"=+\" should not be used instead of \"+=\"",
+    "label": "NOK"
+  },
+  {
+    "code": "target = -5\r\nnum = 3\r\n\r\ntarget = -num  # Compliant; intent to assign inverse value of num is clear\r\ntarget += num",
+    "comment": "\"=+\" should not be used instead of \"+=\"",
+    "label": "OK"
+  },
+  {
+    "code": "def fun(a):\r\n  i = 10\r\n  return i + a       # Noncompliant\r\n  i += 1             # this is never executed",
+    "comment": "All code should be reachable",
+    "label": "NOK"
+  },
+  {
+    "code": "def fun(a):\r\n  i = 10\r\n  return i + a",
+    "comment": "All code should be reachable",
+    "label": "OK"
+  },
+  {
+    "code": "def process1():\r\n    raise BaseException(\"Wrong user input for field X\")  # Noncompliant\r\n\r\ndef process2():\r\n    raise BaseException(\"Wrong configuration\")  # Noncompliant\r\n\r\ndef process3(param):\r\n    if not isinstance(param, int):\r\n        raise Exception(\"param should be an integer\")  # Noncompliant\r\n\r\ndef caller():\r\n    try:\r\n         process1()\r\n         process2()\r\n         process3()\r\n    except BaseException as e:\r\n        if e.args[0] == \"Wrong user input for field X\":\r\n            # process error\r\n            pass\r\n        elif e.args[0] == \"Wrong configuration\":\r\n            # process error\r\n            pass\r\n        else:\r\n            # re-raise other exceptions\r\n            raise",
+    "comment": "\"Exception\" and \"BaseException\" should not be raised",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyProjectError(Exception):\r\n    \"\"\"Exception class from which every exception in this library will derive.\r\n         It enables other projects using this library to catch all errors coming\r\n         from the library with a single \"except\" statement\r\n    \"\"\"\r\n    pass\r\n\r\nclass BadUserInputError(MyProjectError):\r\n    \"\"\"A specific error\"\"\"\r\n    pass\r\n\r\nclass ConfigurationError(MyProjectError):\r\n    \"\"\"A specific error\"\"\"\r\n    pass\r\n\r\ndef process1():\r\n    raise BadUserInputError(\"Wrong user input for field X\")\r\n\r\ndef process2():\r\n    raise ConfigurationError(\"Wrong configuration\")\r\n\r\ndef process3(param):\r\n    if not isinstance(param, int):\r\n        raise TypeError(\"param should be an integer\")\r\n\r\ndef caller():\r\n    try:\r\n         process1()\r\n         process2()\r\n         process3()\r\n    except BadUserInputError as e:\r\n        # process error\r\n        pass\r\n    except ConfigurationError as e:\r\n        # process error\r\n        pass",
+    "comment": "\"Exception\" and \"BaseException\" should not be raised",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass():\r\n    pass",
+    "comment": "New-style classes should be used",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass(object):\r\n    pass",
+    "comment": "New-style classes should be used",
+    "label": "OK"
+  },
+  {
+    "code": "class Empty:\r\n    pass\r\n\r\nclass Add:\r\n    def __add__(self, other):\r\n        return 42\r\n\r\n1 + 2\r\n1 + \"2\"  # Noncompliant\r\nEmpty() + 1  # Noncompliant\r\nAdd() + 1\r\n1 + Add()  # Noncompliant\r\nAdd() + Empty()\r\nEmpty() + Add()  # Noncompliant",
+    "comment": "Operators should be used on compatible types",
+    "label": "NOK"
+  },
+  {
+    "code": "class Empty:\r\n    pass\r\n\r\nclass Add:\r\n    def __add__(self, other):\r\n        return 42\r\n\r\n    def __radd__(self, other):\r\n        return 42\r\n\r\nAdd() + 1\r\n1 + Add()\r\nAdd() + Empty()\r\nEmpty() + Add()",
+    "comment": "Operators should be used on compatible types",
+    "label": "OK"
+  },
+  {
+    "code": "def func(a, b, c):\r\n    return a * b * c\r\n\r\nfunc(6, 93, 31, c=62) # Noncompliant: argument \"c\" is duplicated\r\n\r\nparams = {'c':31}\r\nfunc(6, 93, 31, **params) # Noncompliant: argument \"c\" is duplicated\r\nfunc(6, 93, c=62, **params) # Noncompliant: argument \"c\" is duplicated",
+    "comment": "Function arguments should be passed only once",
+    "label": "NOK"
+  },
+  {
+    "code": "def func(a, b, c):\r\n    return a * b * c\r\n\r\nprint(func(c=31, b=93, a=6)) # Compliant",
+    "comment": "Function arguments should be passed only once",
+    "label": "OK"
+  },
+  {
+    "code": "class Empty:\r\n    pass\r\n\r\nempty = Empty()\r\n\r\nfor a in empty:  # Noncompliant\r\n    print(a)\r\n\r\na, b, c = empty  # Noncompliant\r\n\r\nprint(*empty)  # Noncompliant\r\n\r\n[1, 2, 3, *empty]  # Noncompliant\r\n\r\n# yield from\r\ndef generator():\r\n    yield from Empty()  # Noncompliant\r\n\r\n# async generators\r\nasync def async_generator():\r\n    yield 1\r\n\r\na, *rest = async_generator()  # Noncompliant\r\nfor a in async_generator():  # Noncompliant; \"async\" is missing before \"for\"\r\n    print(a)",
+    "comment": "Iterable unpacking, \"for-in\" loops and \"yield from\" should use an Iterable object",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyIterable:\r\n    def __init__(self, values):\r\n        self._values = values\r\n\r\n    def __iter__(self):\r\n        return iter(self._values)\r\n\r\nmy_iterable = MyIterable(range(10))\r\n\r\nfor a in my_iterable:\r\n    print(a)\r\n\r\na, b, *c = my_iterable\r\n\r\nprint(*my_iterable)\r\n\r\n[1, 2, 3, *my_iterable]\r\n\r\n# yield from\r\ndef generator():\r\n    yield from subgenerator()\r\n\r\ndef subgenerator():\r\n    yield 1\r\n\r\n# async generators\r\nasync def async_generator():\r\n    yield 1\r\n\r\nasync for a in async_generator():\r\n    print(a)",
+    "comment": "Iterable unpacking, \"for-in\" loops and \"yield from\" should use an Iterable object",
+    "label": "OK"
+  },
+  {
+    "code": "def noncompliant():\r\n    foo()  # Noncompliant\r\n    foo = sum\r\n\r\n    func()  # Noncompliant\r\n    def func():\r\n        pass\r\n\r\n    MyClass()  # Noncompliant\r\n    class MyClass:\r\n        pass",
+    "comment": "Variables, classes and functions should be defined before being used",
+    "label": "NOK"
+  },
+  {
+    "code": "def compliant():\r\n    foo = sum\r\n    foo()\r\n\r\n    def func():\r\n        pass\r\n    func()\r\n\r\n    class MyClass:\r\n        pass\r\n    MyClass()",
+    "comment": "Variables, classes and functions should be defined before being used",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass:\r\n    pass\r\n\r\n__all__ = [\r\n    MyClass  # Noncompliant\r\n]",
+    "comment": "Only strings should be listed in \"__all__\"",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    pass\r\n\r\n__all__ = [\r\n    \"MyClass\"\r\n]",
+    "comment": "Only strings should be listed in \"__all__\"",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass(object):\r\n    def __init__(self):\r\n        self.message = 'Hello'\r\n        return self  # Noncompliant",
+    "comment": "\"__init__\" should not return a value",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass(object):\r\n    def __init__(self):\r\n        self.message = 'Hello'",
+    "comment": "\"__init__\" should not return a value",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass:\r\n    pass\r\n\r\nmyvar = MyClass()\r\nmyvar()  # Noncompliant\r\n\r\nnone_var = None\r\nnone_var()  # Noncompliant",
+    "comment": "Calls should not be made to non-callable values",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def __call__(self):\r\n        print(\"called\")\r\n\r\nmyvar = MyClass()\r\nmyvar()",
+    "comment": "Calls should not be made to non-callable values",
+    "label": "OK"
+  },
+  {
+    "code": "# In python 3 the following fails\r\n# In python 2.7.16 on MacOs, \"open\" will just ignore the \"w\" flag\r\nwith open(\"test.txt\", \"aw\") as f:  # Noncompliant\r\n    pass",
+    "comment": "The \"open\" builtin function should be called with a valid mode",
+    "label": "NOK"
+  },
+  {
+    "code": "with open(\"test.txt\", \"a\") as f:\r\n    pass",
+    "comment": "The \"open\" builtin function should be called with a valid mode",
+    "label": "OK"
+  },
+  {
+    "code": "from mymodule import my_func\r\n\r\n__all__ = [\"unknown_func\"]  # Noncompliant. \"unknown_func\" is undefined",
+    "comment": "Only defined names should be listed in \"__all__\"",
+    "label": "NOK"
+  },
+  {
+    "code": "from mymodule import my_func\r\n\r\n__all__ = [\"my_func\"]",
+    "comment": "Only defined names should be listed in \"__all__\"",
+    "label": "OK"
+  },
+  {
+    "code": "class A:\r\n    @property\r\n    def foo(self, unexpected, unexpected2):  # Noncompliant. Too many parameters.\r\n        return self._foo\r\n\r\n    @foo.setter\r\n    def foo(self, value, unexpected):  # Noncompliant. Too many parameters.\r\n        self._foo = value\r\n\r\n    @foo.deleter\r\n    def foo(self, unexpected):  # Noncompliant. Too many parameters.\r\n        del self._foo\r\n\r\nclass B:\r\n    def get_foo(self, unexpected):  # Noncompliant. Too many parameters.\r\n        return self._foo\r\n\r\n    def set_foo(self, value, unexpected):  # Noncompliant. Too many parameters.\r\n        self._foo = value\r\n\r\n    def del_foo(self, unexpected):  # Noncompliant. Too many parameters.\r\n        del self._foo\r\n\r\n    foo = property(get_foo, set_foo, del_foo, \"'foo' property.\")",
+    "comment": "Property getter, setter and deleter methods should have the expected number of parameters",
+    "label": "NOK"
+  },
+  {
+    "code": "class A:\r\n    @property\r\n    def foo(self):\r\n        return self._foo\r\n\r\n    @foo.setter\r\n    def foo(self, value):\r\n        self._foo = value\r\n\r\n    @foo.deleter\r\n    def foo(self):\r\n        del self._foo\r\n\r\nclass B:\r\n    def get_foo(self):\r\n        return self._foo\r\n\r\n    def set_foo(self, value):\r\n        self._foo = value\r\n\r\n    def del_foo(self):\r\n        del self._foo\r\n\r\n    foo = property(get_foo, set_foo, del_foo, \"'foo' property.\")",
+    "comment": "Property getter, setter and deleter methods should have the expected number of parameters",
+    "label": "OK"
+  },
+  {
+    "code": "class A:\r\n    def __mul__(self, other, unexpected):  # Noncompliant. Too many parameters\r\n        return 42\r\n\r\n    def __add__(self):  # Noncompliant. Missing one parameter\r\n        return 42\r\n\r\nA() * 3  # TypeError: __mul__() missing 1 required positional argument: 'unexpected'\r\nA() + 3  # TypeError: __add__() takes 1 positional argument but 2 were given",
+    "comment": "Special methods should have an expected number of parameters",
+    "label": "NOK"
+  },
+  {
+    "code": "class A:\r\n    def __mul__(self, other):\r\n        return 42\r\n\r\n    def __add__(self, other):\r\n        return 42\r\n\r\nA() * 3\r\nA() + 3",
+    "comment": "Special methods should have an expected number of parameters",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method():  # Noncompliant. \"self\" parameter is missing.\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method():  # Noncompliant. \"cls\" parameter is missing.\r\n        print(\"class_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method(self):\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method(cls):\r\n        print(\"class_method\")\r\n\r\n\r\n    @staticmethod\r\n    def static_method():\r\n        print(\"static_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "OK"
+  },
+  {
+    "code": "try:\r\n    raise TypeError()\r\nexcept ValueError or TypeError:  # Noncompliant\r\n    print(\"Catching only ValueError\")\r\nexcept ValueError and TypeError:  # Noncompliant\r\n    print(\"catching only TypeError\")\r\nexcept (ValueError or TypeError) as exception:  # Noncompliant\r\n    print(\"Catching only ValueError\")\r\n\r\nfoo = ValueError or TypeError  # foo == ValueError\r\nfoo = ValueError and TypeError  # foo == TypeError",
+    "comment": "Boolean expressions of exceptions should not be used in \"except\" statements",
+    "label": "NOK"
+  },
+  {
+    "code": "try:\r\n    raise TypeError()\r\nexcept (ValueError, TypeError) as exception:\r\n    print(\"Catching all exceptions\")",
+    "comment": "Boolean expressions of exceptions should not be used in \"except\" statements",
+    "label": "OK"
+  },
+  {
+    "code": "del (1, 2)[0]  # Noncompliant, tuples are immutable\r\n(1, 2)[0] = 42  # Noncompliant\r\n(1, 2)[0]\r\n\r\nclass A:\r\n    def __init__(self, values):\r\n        self._values = values\r\n\r\na = A([0,1,2])\r\n\r\na[0]  # Noncompliant\r\ndel a[0]  # Noncompliant\r\na[0] = 42  # Noncompliant\r\n\r\nclass B:\r\n    pass\r\n\r\nB[0]  # Noncompliant",
+    "comment": "Item operations should be done on objects supporting them",
+    "label": "NOK"
+  },
+  {
+    "code": "del [1, 2][0]  # Lists are mutable\r\n[1, 2][0] = 42\r\n[1, 2][0]\r\n\r\nclass A:\r\n    def __init__(self, values):\r\n        self._values = values\r\n\r\n    def __getitem__(self, key):\r\n        return self._values[key]\r\n\r\n    def __setitem__(self, key, value):\r\n        self._values[key] = value\r\n\r\n    def __delitem__(self, key):\r\n        del self._values[key]\r\n\r\na = A([0,1,2])\r\n\r\na[0]\r\ndel a[0]\r\na[0] = 42\r\n\r\nclass B:\r\n    def __class_getitem__(cls, key):\r\n        return [0, 1, 2, 3][key]\r\n\r\nB[0]",
+    "comment": "Item operations should be done on objects supporting them",
+    "label": "OK"
+  },
+  {
+    "code": "raise \"Something went wrong\"  # Noncompliant\r\n\r\nclass A:\r\n    pass\r\n\r\nraise A  # Noncompliant",
+    "comment": "Raised Exceptions must derive from BaseException",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyError(Exception):\r\n    pass\r\n\r\nraise MyError(\"Something went wrong\")\r\nraise MyError",
+    "comment": "Raised Exceptions must derive from BaseException",
+    "label": "OK"
+  },
+  {
+    "code": "class Empty:\r\n    pass\r\n\r\nclass Add:\r\n    def __add__(self, other):\r\n        return 42\r\n\r\n1 + 2\r\n1 + \"2\"  # Noncompliant\r\nEmpty() + 1  # Noncompliant\r\nAdd() + 1\r\n1 + Add()  # Noncompliant\r\nAdd() + Empty()\r\nEmpty() + Add()  # Noncompliant",
+    "comment": "Operators should be used on compatible types",
+    "label": "NOK"
+  },
+  {
+    "code": "class Empty:\r\n    pass\r\n\r\nclass Add:\r\n    def __add__(self, other):\r\n        return 42\r\n\r\n    def __radd__(self, other):\r\n        return 42\r\n\r\nAdd() + 1\r\n1 + Add()\r\nAdd() + Empty()\r\nEmpty() + Add()",
+    "comment": "Operators should be used on compatible types",
+    "label": "OK"
+  },
+  {
+    "code": "def func(a, b, c):\r\n    return a * b * c\r\n\r\nfunc(6, 93, 31, c=62) # Noncompliant: argument \"c\" is duplicated\r\n\r\nparams = {'c':31}\r\nfunc(6, 93, 31, **params) # Noncompliant: argument \"c\" is duplicated\r\nfunc(6, 93, c=62, **params) # Noncompliant: argument \"c\" is duplicated",
+    "comment": "Function arguments should be passed only once",
+    "label": "NOK"
+  },
+  {
+    "code": "def func(a, b, c):\r\n    return a * b * c\r\n\r\nprint(func(c=31, b=93, a=6)) # Compliant",
+    "comment": "Function arguments should be passed only once",
+    "label": "OK"
+  },
+  {
+    "code": "class Empty:\r\n    pass\r\n\r\nempty = Empty()\r\n\r\nfor a in empty:  # Noncompliant\r\n    print(a)\r\n\r\na, b, c = empty  # Noncompliant\r\n\r\nprint(*empty)  # Noncompliant\r\n\r\n[1, 2, 3, *empty]  # Noncompliant\r\n\r\n# yield from\r\ndef generator():\r\n    yield from Empty()  # Noncompliant\r\n\r\n# async generators\r\nasync def async_generator():\r\n    yield 1\r\n\r\na, *rest = async_generator()  # Noncompliant\r\nfor a in async_generator():  # Noncompliant; \"async\" is missing before \"for\"\r\n    print(a)",
+    "comment": "Iterable unpacking, \"for-in\" loops and \"yield from\" should use an Iterable object",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyIterable:\r\n    def __init__(self, values):\r\n        self._values = values\r\n\r\n    def __iter__(self):\r\n        return iter(self._values)\r\n\r\nmy_iterable = MyIterable(range(10))\r\n\r\nfor a in my_iterable:\r\n    print(a)\r\n\r\na, b, *c = my_iterable\r\n\r\nprint(*my_iterable)\r\n\r\n[1, 2, 3, *my_iterable]\r\n\r\n# yield from\r\ndef generator():\r\n    yield from subgenerator()\r\n\r\ndef subgenerator():\r\n    yield 1\r\n\r\n# async generators\r\nasync def async_generator():\r\n    yield 1\r\n\r\nasync for a in async_generator():\r\n    print(a)",
+    "comment": "Iterable unpacking, \"for-in\" loops and \"yield from\" should use an Iterable object",
+    "label": "OK"
+  },
+  {
+    "code": "def noncompliant():\r\n    foo()  # Noncompliant\r\n    foo = sum\r\n\r\n    func()  # Noncompliant\r\n    def func():\r\n        pass\r\n\r\n    MyClass()  # Noncompliant\r\n    class MyClass:\r\n        pass",
+    "comment": "Variables, classes and functions should be defined before being used",
+    "label": "NOK"
+  },
+  {
+    "code": "def compliant():\r\n    foo = sum\r\n    foo()\r\n\r\n    def func():\r\n        pass\r\n    func()\r\n\r\n    class MyClass:\r\n        pass\r\n    MyClass()",
+    "comment": "Variables, classes and functions should be defined before being used",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass:\r\n    pass\r\n\r\n__all__ = [\r\n    MyClass  # Noncompliant\r\n]",
+    "comment": "Only strings should be listed in \"__all__\"",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    pass\r\n\r\n__all__ = [\r\n    \"MyClass\"\r\n]",
+    "comment": "Only strings should be listed in \"__all__\"",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass(object):\r\n    def __init__(self):\r\n        self.message = 'Hello'\r\n        return self  # Noncompliant",
+    "comment": "\"__init__\" should not return a value",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass(object):\r\n    def __init__(self):\r\n        self.message = 'Hello'",
+    "comment": "\"__init__\" should not return a value",
+    "label": "OK"
+  },
+  {
+    "code": "def my_pow(num, exponent):  # Noncompliant\r\n    num = num * my_pow(num, exponent - 1)\r\n    return num  # this is never reached",
+    "comment": "Recursion should not be infinite",
+    "label": "NOK"
+  },
+  {
+    "code": "def my_pow(num, exponent):  # Compliant\r\n    if exponent > 1:\r\n      num = num * my_pow(num, exponent - 1)\r\n    return num",
+    "comment": "Recursion should not be infinite",
+    "label": "OK"
+  },
+  {
+    "code": "foo = 1 == \"1\"  # Noncompliant. Always False.\r\n\r\nfoo = 1 != \"1\"  # Noncompliant. Always True.\r\n\r\nclass A:\r\n    pass\r\n\r\nmyvar = A() == 1  # Noncompliant. Always False.\r\nmyvar = A() != 1  # Noncompliant. Always True.",
+    "comment": "Silly equality checks should not be made",
+    "label": "NOK"
+  },
+  {
+    "code": "foo = 1 == int(\"1\")\r\n\r\nfoo = str(1) != \"1\"\r\n\r\nclass Eq:\r\n    def __eq__(self, other):\r\n        return True\r\n\r\nmyvar = Eq() == 1\r\nmyvar = 1 == Eq()\r\nmyvar = Eq() != 1  # Ok. \"__ne__\" calls \"__eq__\" by default\r\nmyvar = 1 != Eq()",
+    "comment": "Silly equality checks should not be made",
+    "label": "OK"
+  },
+  {
+    "code": "class A:\r\n    pass\r\n\r\ntry:\r\n    raise ValueError(\"orig\")\r\nexcept ValueError as e:\r\n    new_exc = TypeError(\"new\")\r\n    new_exc.__cause__ = A()  # Noncompliant\r\n    raise new_exc\r\n\r\ntry:\r\n    raise ValueError(\"orig\")\r\nexcept ValueError as e:\r\n    raise TypeError(\"new\") from \"test\"  # Noncompliant",
+    "comment": "Exceptions' \"__cause__\" should be either an Exception or None",
+    "label": "NOK"
+  },
+  {
+    "code": "try:\r\n    raise ValueError(\"orig\")\r\nexcept ValueError as e:\r\n    new_exc = TypeError(\"new\")\r\n    new_exc.__cause__ = None  # Ok\r\n    raise new_exc\r\n\r\ntry:\r\n    raise ValueError(\"orig\")\r\nexcept ValueError as e:\r\n    new_exc = TypeError(\"new\")\r\n    new_exc.__cause__ = e  # Ok\r\n    raise new_exc\r\n\r\ntry:\r\n    raise ValueError(\"orig\")\r\nexcept ValueError as e:\r\n    raise TypeError(\"new\") from None  # Ok\r\n\r\ntry:\r\n    raise ValueError(\"orig\")\r\nexcept ValueError as e:\r\n    raise TypeError(\"new\") from e  # Ok",
+    "comment": "Exceptions' \"__cause__\" should be either an Exception or None",
+    "label": "OK"
+  },
+  {
+    "code": "narg=len(sys.argv)\r\nif narg == 1:\r\n        print('@Usage: input_filename nelements nintervals')\r\n        break",
+    "comment": "\"break\" and \"continue\" should not be used outside a loop",
+    "label": "NOK"
+  },
+  {
+    "code": "if narg == 1:\r\n        print('@Usage: input_filename nelements nintervals')\r\n        sys.exit()",
+    "comment": "\"break\" and \"continue\" should not be used outside a loop",
+    "label": "OK"
+  },
+  {
+    "code": "def find_file_which_contains(expected_content, paths):\r\n    file = None\r\n    for path in paths:\r\n        try:\r\n            # \"open\" will raise IsADirectoryError if the provided path is a directory but it will be stopped by the  \"return\" and \"continue\"\r\n            file = open(path, 'r')\r\n            actual_content = file.read()\r\n        except FileNotFoundError as exception:\r\n            # This exception will never pass the \"finally\" block because of \"return\" and \"continue\"\r\n            raise ValueError(f\"'paths' should only contain existing files. File ${path} does not exist.\")\r\n        finally:\r\n            file.close()\r\n            if actual_content != expected_content:\r\n                # Note that \"continue\" is allowed in a \"finally\" block only since python 3.8\r\n                continue  # Noncompliant. This will prevent exceptions raised by the \"try\" block and \"except\" block from raising.\r\n            else:\r\n                return path # Noncompliant. Same as for \"continue\"\r\n    return None\r\n\r\n# This will return None instead of raising ValueError from the \"except\" block\r\nfind_file_which_contains(\"some content\", [\"file_which_does_not_exist\"])\r\n\r\n# This will return None instead of raising IsADirectoryError from the \"try\" block\r\nfind_file_which_contains(\"some content\", [\"a_directory\"])\r\n\r\nimport sys\r\n\r\nwhile True:\r\n    try:\r\n        sys.exit(1)\r\n    except (SystemExit) as e:\r\n        print(\"Exiting\")\r\n        raise\r\n    finally:\r\n        break  # This will prevent SystemExit from raising\r\n\r\ndef continue_whatever_happens_noncompliant():\r\n    for i in range(10):\r\n        try:\r\n            raise ValueError()\r\n        finally:\r\n            continue  # Noncompliant",
+    "comment": "Break, continue and return statements should not occur in \"finally\" blocks",
+    "label": "NOK"
+  },
+  {
+    "code": "# Note that using \"with open(...) as\" would be better. We keep the example as is just for demonstration purpose.\r\n\r\ndef find_file_which_contains(expected_content, paths):\r\n    file = None\r\n    for path in paths:\r\n        try:\r\n            file = open(path, 'r')\r\n            actual_content = file.read()\r\n            if actual_content != expected_content:\r\n                continue\r\n            else:\r\n                return path\r\n        except FileNotFoundError as exception:\r\n            raise ValueError(f\"'paths' should only contain existing files. File ${path} does not exist.\")\r\n        finally:\r\n            if file:\r\n                file.close()\r\n    return None\r\n\r\n# This raises ValueError\r\nfind_file_which_contains(\"some content\", [\"file_which_does_not_exist\"])\r\n\r\n# This raises IsADirectoryError\r\nfind_file_which_contains(\"some content\", [\"a_directory\"])\r\n\r\nimport sys\r\n\r\nwhile True:\r\n    try:\r\n        sys.exit(1)\r\n    except (SystemExit) as e:\r\n        print(\"Exiting\")\r\n        raise # SystemExit is re-raised\r\n\r\nimport logging\r\n\r\ndef continue_whatever_happens_compliant():\r\n    for i in range(10):\r\n        try:\r\n            raise ValueError()\r\n        except Exception:\r\n            logging.exception(\"Failed\")  # Ignore all \"Exception\" subclasses yet allow SystemExit and other important exceptions to pass",
+    "comment": "Break, continue and return statements should not occur in \"finally\" blocks",
+    "label": "OK"
+  },
+  {
+    "code": "mylist = []\r\nif len(myList) >= 0:  # Noncompliant\r\n    pass\r\n\r\nif len(myList) < 0:  # Noncompliant\r\n    pass",
+    "comment": "Collection sizes and array length comparisons should make sense",
+    "label": "NOK"
+  },
+  {
+    "code": "mylist = []\r\nif len(myList) >= 42:\r\n    pass\r\n\r\nif len(myList) == 0:\r\n    pass",
+    "comment": "Collection sizes and array length comparisons should make sense",
+    "label": "OK"
+  },
+  {
+    "code": "target = -5\r\nnum = 3\r\n\r\ntarget =- num  # Noncompliant; target = -3. Is that really what's meant?\r\ntarget =+ num # Noncompliant; target = 3",
+    "comment": "\"=+\" should not be used instead of \"+=\"",
+    "label": "NOK"
+  },
+  {
+    "code": "target = -5\r\nnum = 3\r\n\r\ntarget = -num  # Compliant; intent to assign inverse value of num is clear\r\ntarget += num",
+    "comment": "\"=+\" should not be used instead of \"+=\"",
+    "label": "OK"
+  },
+  {
+    "code": "++x # Noncompliant\r\n",
+    "comment": "Increment and decrement operators should not be used",
+    "label": "NOK"
+  },
+  {
+    "code": "x += 1\r\n",
+    "comment": "Increment and decrement operators should not be used",
+    "label": "OK"
+  },
+  {
+    "code": "def myfunc(param):\r\n    if param is None:\r\n        print(param.test())  # Noncompliant\r\n\r\n    if param == None:\r\n        print(param.test())  # Noncompliant\r\n\r\n    if param is not None:\r\n        pass\r\n    else:\r\n        print(param.test())  # Noncompliant\r\n\r\n    if param != None:\r\n        pass\r\n    else:\r\n        print(param.test())  # Noncompliant",
+    "comment": "Attributes should not be accessed on \"None\" values",
+    "label": "NOK"
+  },
+  {
+    "code": "if param == 1:\r\n  openWindow()\r\nelif param == 2:\r\n  closeWindow()\r\nelif param == 1:            # Noncompliant\r\n  moveWindowToTheBackground()",
+    "comment": "Related \"if/else if\" statements should not have the same condition",
+    "label": "NOK"
+  },
+  {
+    "code": "if param == 1:\r\n  openWindow()\r\nelif param == 2:\r\n  closeWindow()\r\nelif param == 3:\r\n  moveWindowToTheBackground()",
+    "comment": "Related \"if/else if\" statements should not have the same condition",
+    "label": "OK"
+  },
+  {
+    "code": "if param == 1:\r\n  openWindow()\r\nelif param == 2:\r\n  closeWindow()\r\nelif param == 3:\r\n  moveWindowToTheBackground()",
+    "comment": "Related \"if/else if\" statements should not have the same condition",
+    "label": "OK"
+  },
+  {
+    "code": "if a == a: # Noncompliant\r\n    work()\r\n\r\nif  a != a: # Noncompliant\r\n    work()\r\n\r\nif  a == b and a == b: # Noncompliant\r\n    work()\r\n\r\nif a == b or a == b: # Noncompliant\r\n    work()\r\n\r\nj = 5 / 5 # Noncompliant\r\nk = 5 - 5 # Noncompliant",
+    "comment": "Identical expressions should not be used on both sides of a binary operator",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method():  # Noncompliant. \"self\" parameter is missing.\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method():  # Noncompliant. \"cls\" parameter is missing.\r\n        print(\"class_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method(self):\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method(cls):\r\n        print(\"class_method\")\r\n\r\n\r\n    @staticmethod\r\n    def static_method():\r\n        print(\"static_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method(self):\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method(cls):\r\n        print(\"class_method\")\r\n\r\n\r\n    @staticmethod\r\n    def static_method():\r\n        print(\"static_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "OK"
+  },
+  {
+    "code": "def func(a, b, compute):\r\n    i = a + b  # Noncompliant; calculation result not used before value is overwritten\r\n    i = compute()  # Noncompliant; the value is not used before leaving the function",
+    "comment": "Unused assignments should be removed",
+    "label": "NOK"
+  },
+  {
+    "code": "def func(a, b, compute):\r\n    i = a + b\r\n    i += compute()\r\n    return i",
+    "comment": "Unused assignments should be removed",
+    "label": "OK"
+  },
+  {
+    "code": "if (True): print(\"hello\")\r\n",
+    "comment": "Statements should be on separate lines",
+    "label": "NOK"
+  },
+  {
+    "code": "if (True):\r\n    print(\"hello\")",
+    "comment": "Statements should be on separate lines",
+    "label": "OK"
+  },
+
+  {
+    "code": "DYNAMO_CLIENT = boto3.client('dynamodb', config=config)\r\n\r\nDYNAMO_CLIENT.scan(\r\n    FilterExpression= username + \" = :u AND password = :p\", # username is user-controlled\r\n    ExpressionAttributeValues={\r\n        \":u\": { 'S': username },\r\n        \":p\": { 'S': password }\r\n     },\r\n    ProjectionExpression=\"username, password\",\r\n    TableName=\"users\"\r\n) # Noncompliant",
+    "comment": "NoSQL operations should not be vulnerable to injection attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "DYNAMO_CLIENT = boto3.client('dynamodb', config=config)\r\n\r\nDYNAMO_CLIENT.scan(\r\n    FilterExpression= \"username = :u AND password = :p\",\r\n    ExpressionAttributeValues={\r\n        \":u\": { 'S': username },\r\n        \":p\": { 'S': password }\r\n     },\r\n    ProjectionExpression=\"username, password\",\r\n    TableName=\"users\"\r\n)",
+    "comment": "NoSQL operations should not be vulnerable to injection attacks",
+    "label": "OK"
+  },
+  {
+    "code": "from flask import request, redirect, Response\r\n\r\n@app.route('flask_redirect')\r\ndef flask_redirect():\r\n    url = request.args[\"next\"]\r\n    return redirect(url)  # Noncompliant\r\n\r\n@app.route('set_location_header')\r\ndef set_location_header():\r\n    url = request.args[\"next\"]\r\n    response = Response(\"redirecting...\", 302)\r\n    response.headers['Location'] = url  # Noncompliant\r\n    return response",
+    "comment": "HTTP request redirections should not be open to forging attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "from flask import request, redirect, Response, url_for\r\n\r\n@app.route('flask_redirect')\r\ndef flask_redirect():\r\n    endpoint = request.args[\"next\"]\r\n    return redirect(url_for(endpoint))  # Compliant",
+    "comment": "HTTP request redirections should not be open to forging attacks",
+    "label": "OK"
+  },
+  {
+    "code": "jwt.decode(token, verify = False)  # Noncompliant\r\njwt.decode(token, key, options={\"verify_signature\": False})  # Noncompliant",
+    "comment": "JWT should be signed and verified",
+    "label": "NOK"
+  },
+  {
+    "code": "jwt.decode(token, key, algo)\r\n",
+    "comment": "JWT should be signed and verified",
+    "label": "OK"
+  },
+  {
+    "code": "from OpenSSL import SSL\r\n\r\nSSL.Context(SSL.SSLv3_METHOD)  # Noncompliant",
+    "comment": "Weak SSL/TLS protocols should not be used",
+    "label": "NOK"
+  },
+  {
+    "code": "from OpenSSL import SSL\r\n\r\nSSL.Context(SSL.TLSv1_2_METHOD)  # Compliant",
+    "comment": "Weak SSL/TLS protocols should not be used",
+    "label": "OK"
+  },
+  {
+    "code": "from django.http import HttpResponse\r\n\r\ndef index(request):\r\n    value = request.GET.get(\"value\")\r\n    response = HttpResponse(\"\")\r\n    response[\"Set-Cookie\"] = value  # Noncompliant\r\n    response.set_cookie(\"sessionid\", value)  # Noncompliant\r\n    return response",
+    "comment": "HTTP responses should not be vulnerable to session fixation",
+    "label": "NOK"
+  },
+  {
+    "code": "from django.http import HttpResponse\r\n\r\ndef index(request):\r\n    value = request.GET.get(\"value\")\r\n    response = HttpResponse(\"\")\r\n    response[\"X-Data\"] = value\r\n    response.set_cookie(\"data\", value)\r\n    return response",
+    "comment": "HTTP responses should not be vulnerable to session fixation",
+    "label": "OK"
+  },
+  {
+    "code": "from flask import request\r\n\r\n@app.route('/')\r\ndef index():\r\n    module = request.args.get(\"module\")\r\n    exec(\"import urllib%s as urllib\" % module) # Noncompliant",
+    "comment": "Dynamic code execution should not be vulnerable to injection attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "from flask import request\r\n\r\n@app.route('/')\r\ndef index():\r\n    module = request.args.get(\"module\")\r\n    exec(\"import urllib%d as urllib\" % int(module)) # Compliant; module is safely cast to an integer",
+    "comment": "Dynamic code execution should not be vulnerable to injection attacks",
+    "label": "OK"
+  },
+  {
+    "code": "DYNAMO_CLIENT = boto3.client('dynamodb', config=config)\r\n\r\nDYNAMO_CLIENT.scan(\r\n    FilterExpression= username + \" = :u AND password = :p\", # username is user-controlled\r\n    ExpressionAttributeValues={\r\n        \":u\": { 'S': username },\r\n        \":p\": { 'S': password }\r\n     },\r\n    ProjectionExpression=\"username, password\",\r\n    TableName=\"users\"\r\n) # Noncompliant",
+    "comment": "NoSQL operations should not be vulnerable to injection attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "DYNAMO_CLIENT = boto3.client('dynamodb', config=config)\r\n\r\nDYNAMO_CLIENT.scan(\r\n    FilterExpression= \"username = :u AND password = :p\",\r\n    ExpressionAttributeValues={\r\n        \":u\": { 'S': username },\r\n        \":p\": { 'S': password }\r\n     },\r\n    ProjectionExpression=\"username, password\",\r\n    TableName=\"users\"\r\n)",
+    "comment": "NoSQL operations should not be vulnerable to injection attacks",
+    "label": "OK"
+  },
+  {
+    "code": "from flask import request, redirect, Response\r\n\r\n@app.route('flask_redirect')\r\ndef flask_redirect():\r\n    url = request.args[\"next\"]\r\n    return redirect(url)  # Noncompliant\r\n\r\n@app.route('set_location_header')\r\ndef set_location_header():\r\n    url = request.args[\"next\"]\r\n    response = Response(\"redirecting...\", 302)\r\n    response.headers['Location'] = url  # Noncompliant\r\n    return response",
+    "comment": "HTTP request redirections should not be open to forging attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "from flask import request, redirect, Response, url_for\r\n\r\n@app.route('flask_redirect')\r\ndef flask_redirect():\r\n    endpoint = request.args[\"next\"]\r\n    return redirect(url_for(endpoint))  # Compliant",
+    "comment": "HTTP request redirections should not be open to forging attacks",
+    "label": "OK"
+  },
+  {
+    "code": "from flask import request\r\nimport pickle\r\nimport yaml\r\n\r\n@app.route('/pickle')\r\ndef pickle_loads():\r\n    file = request.files['pickle']\r\n    pickle.load(file) # Noncompliant; Never use pickle module to deserialize user inputs\r\n\r\n@app.route('/yaml')\r\ndef yaml_load():\r\n    data = request.GET.get(\"data\")\r\n    yaml.load(data, Loader=yaml.Loader) # Noncompliant; Avoid using yaml.load with unsafe yaml.Loader",
+    "comment": "Deserialization should not be vulnerable to injection attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "from flask import request\r\nimport yaml\r\n\r\n@app.route('/yaml')\r\ndef yaml_load():\r\n    data = request.GET.get(\"data\")\r\n    yaml.load(data) # Compliant;  Prefer using yaml.load with the default safe loader",
+    "comment": "Deserialization should not be vulnerable to injection attacks",
+    "label": "OK"
+  },
+  {
+    "code": "from flask import request\r\nfrom flask_sqlalchemy import SQLAlchemy\r\nfrom sqlalchemy import text\r\nfrom database.users import User\r\n\r\n@app.route('hello')\r\ndef hello():\r\n    id = request.args.get(\"id\")\r\n    stmt = text(\"SELECT * FROM users where id=%s\" % id) # Query is constructed based on user inputs\r\n    query = SQLAlchemy().session.query(User).from_statement(stmt) # Noncompliant\r\n    user = query.one()\r\n    return \"Hello %s\" % user.username",
+    "comment": "Database queries should not be vulnerable to injection attacks",
+    "label": "NOK"
+  },
+  {
+    "code": "from flask import request\r\nfrom flask_sqlalchemy import SQLAlchemy\r\nfrom sqlalchemy import text\r\nfrom database.users import User\r\n\r\n@app.route('hello')\r\ndef hello():\r\n    id = request.args.get(\"id\")\r\n    stmt = text(\"SELECT * FROM users where id=:id\")\r\n    query = SQLAlchemy().session.query(User).from_statement(stmt).params(id=id) # Compliant\r\n    user = query.one()\r\n    return \"Hello %s\" % user.username",
+    "comment": "Database queries should not be vulnerable to injection attacks",
+    "label": "OK"
+  },
+  {
+    "code": "class A:\r\n    def __mul__(self, other, unexpected):  # Noncompliant. Too many parameters\r\n        return 42\r\n\r\n    def __add__(self):  # Noncompliant. Missing one parameter\r\n        return 42\r\n\r\nA() * 3  # TypeError: __mul__() missing 1 required positional argument: 'unexpected'\r\nA() + 3  # TypeError: __add__() takes 1 positional argument but 2 were given",
+    "comment": "Special methods should have an expected number of parameters",
+    "label": "NOK"
+  },
+  {
+    "code": "class A:\r\n    def __mul__(self, other):\r\n        return 42\r\n\r\n    def __add__(self, other):\r\n        return 42\r\n\r\nA() * 3\r\nA() + 3",
+    "comment": "Special methods should have an expected number of parameters",
+    "label": "OK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method():  # Noncompliant. \"self\" parameter is missing.\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method():  # Noncompliant. \"cls\" parameter is missing.\r\n        print(\"class_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "NOK"
+  },
+  {
+    "code": "class MyClass:\r\n    def instance_method(self):\r\n        print(\"instance_method\")\r\n\r\n    @classmethod\r\n    def class_method(cls):\r\n        print(\"class_method\")\r\n\r\n\r\n    @staticmethod\r\n    def static_method():\r\n        print(\"static_method\")",
+    "comment": "Instance and class methods should have at least one positional parameter",
+    "label": "OK"
+  }
+]

@@ -7,13 +7,13 @@ import numpy as np
 class ADRQN(nn.Module):
     def __init__(self, n_actions, state_size, embedding_size):
         super(ADRQN, self).__init__()
-        print("INIT THE NETWORK")
         self.n_actions = n_actions
         self.embedding_size = embedding_size
         self.embedder = nn.Linear(n_actions, embedding_size)
         self.obs_layer = nn.Linear(state_size, 16)
-        self.obs_layer2 = nn.Linear(16, 32)
-        self.lstm = nn.LSTM(input_size=32 + embedding_size,
+        self.obs_layer1 = nn.Linear(16, 32)
+        self.obs_layer2 = nn.Linear(32, 64)
+        self.lstm = nn.LSTM(input_size=64 + embedding_size,
                             hidden_size=128, batch_first=True)
         self.out_layer = nn.Linear(128, n_actions)
 
@@ -22,6 +22,7 @@ class ADRQN(nn.Module):
         # Takes one_hot actions with shape (batch_size, seq_len, n_actions)
         action_embedded = self.embedder(action)
         observation = F.relu(self.obs_layer(observation))
+        observation = F.relu(self.obs_layer1(observation))
         observation = F.relu(self.obs_layer2(observation))
         lstm_input = torch.cat([observation, action_embedded], dim=-1)
         if hidden is not None:
